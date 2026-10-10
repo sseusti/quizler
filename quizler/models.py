@@ -28,6 +28,7 @@ class Quiz:
         self._questions = tuple(questions)
         self._position = 0
         self.score = 0
+        self._has_answered_current = False
 
     @property
     def total_questions(self) -> int:
@@ -52,13 +53,23 @@ class Quiz:
             raise StopIteration("The quiz is complete")
         question = self._questions[self._position]
         self._position += 1
+        self._has_answered_current = False
         return question
 
     def submit_answer(self, answer: bool) -> bool:
         question = self.current_question
         if question is None:
             raise RuntimeError("There is no active question to answer")
+        if self._has_answered_current:
+            raise RuntimeError("The current question has already been answered")
+        self._has_answered_current = True
         is_correct = answer is question.answer
         if is_correct:
             self.score += 1
         return is_correct
+
+    def reset(self) -> None:
+        """Start the same quiz again from its first question."""
+        self._position = 0
+        self.score = 0
+        self._has_answered_current = False
